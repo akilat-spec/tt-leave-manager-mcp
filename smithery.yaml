@@ -1,0 +1,32 @@
+name: LeaveManager
+version: "1.0.0"
+
+startCommand:
+  type: "http"
+  command: ["python", "main.py"]
+  port: 8080
+  path: "/mcp"
+  configSchema:
+  type: object
+  required: ["DB_HOST", "DB_USER", "DB_PASSWORD", "DB_NAME"]
+  properties:
+    DB_HOST:
+      type: string
+      title: "Database host"
+      default: "103.174.10.72"
+    DB_USER:
+      type: string
+      title: "Database user"
+      default: "tt_crm_mcp"
+    DB_PASSWORD:
+      type: string
+      title: "Database password"
+      default: "F*PAtqhu@sg2w58n"
+    DB_NAME:
+      type: string
+      title: "Database name"
+      default: "tt_crm_mcp"
+    DB_PORT:
+      type: string
+      title: "Database port"
+      default: "3306"
