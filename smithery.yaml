@@ -1,12 +1,14 @@
-name: LeaveManager
-version: "1.0.0"
+name: tt-leave-manager-mcp
+description: Track and manage employee time off with quick balance lookups and streamlined applications.
+version: 1.16.1
 
 startCommand:
-  type: "http"
+  type: http
   command: ["python", "main.py"]
   port: 8080
   path: "/mcp"
-  configSchema:
+  
+configSchema:
   type: object
   required: ["DB_HOST", "DB_USER", "DB_PASSWORD", "DB_NAME"]
   properties:

@@ -17,37 +17,25 @@ except ImportError:
 
 # For health route responses (used by FastMCP custom_route)
 from starlette.requests import Request
-from starlette.responses import PlainTextResponse
+from starlette.responses import PlainTextResponse, JSONResponse
 
 # -------------------------------
 # MCP server
 # -------------------------------
-mcp = FastMCP("HRManagement")
+mcp = FastMCP("LeaveManager")
 
 # -------------------------------
 # MySQL connection (reads from env)
 # -------------------------------
 def get_connection():
     """
-    Read DB credentials from DATABASE_URL (mysql://user:pass@host:port/dbname)
-    or from DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT.
+    Read DB credentials from environment variables
     """
-    db_url = os.environ.get("DATABASE_URL")
-    if db_url:
-        parsed = urllib.parse.urlparse(db_url)
-        return mysql.connector.connect(
-            host=parsed.hostname or "103.174.10.72",
-            user=parsed.username or "leave_mcp",
-            password=parsed.password or "PY@4rjQu%ha0byc7",
-            database=(parsed.path.lstrip("/") if parsed.path else ""),
-            port=parsed.port or 3306,
-        )
-
     return mysql.connector.connect(
         host=os.environ.get("DB_HOST", "103.174.10.72"),
-        user=os.environ.get("DB_USER", "leave_mcp"),
-        password=os.environ.get("DB_PASSWORD", "PY@4rjQu%ha0byc7"),
-        database=os.environ.get("DB_NAME", "tt_crm"),
+        user=os.environ.get("DB_USER", "tt_crm_mcp"),
+        password=os.environ.get("DB_PASSWORD", "F*PAtqhu@sg2w58n"),
+        database=os.environ.get("DB_NAME", "tt_crm_mcp"),
         port=int(os.environ.get("DB_PORT", "3306")),
     )
 
@@ -528,65 +516,36 @@ def search_employees(search_query: str) -> str:
     return response
 
 # -------------------------------
-# AI Assistant Resource
+# MCP Endpoint
 # -------------------------------
-@mcp.resource("hr_assistant://{query}")
-def hr_assistant_help(query: str) -> str:
-    help_text = """
-🤖 **AI-Powered HR Management Assistant**
+@mcp.custom_route("/mcp", methods=["POST"])
+async def mcp_endpoint(request: Request):
+    """MCP protocol endpoint"""
+    return JSONResponse({"status": "MCP server is running"})
 
-I can help you with employee information and management:
-
-🔍 **Employee Search & Details**
-- "Get details for John Smith"
-- "Find employees in development"
-- "Search for priya@company.com"
-
-📊 **Leave Management**
-- "Get leave balance for Raj"
-- "Show leave history for Maria"
-- "Check John's leave balance"
-
-📋 **Work Reports**
-- "Get work report for Sarah"
-- "Show last 30 days work for Mike"
-- "Work report for David (14 days)"
-
-🏖️  **Leave History**
-- "Leave history for Lisa"
-- "Show all leaves for Robert"
-
-💼 **Employee Information**
-- "Search for mobile developers"
-- "Find all active employees"
-- "Lookup employee #EMP001"
-
-Examples:
-- "What's the leave balance for John?"
-- "Get work report for Maria for last 14 days"
-- "Show me all details for Robert"
-- "Search for Python developers"
-    """
-    return help_text
-
-# -------------------------------
-# Health check route (HTTP only)
-# -------------------------------
 @mcp.custom_route("/health", methods=["GET"])
 async def health_check(request: Request) -> PlainTextResponse:
     return PlainTextResponse("OK")
 
+@mcp.custom_route("/", methods=["GET"])
+async def root(request: Request) -> JSONResponse:
+    return JSONResponse({
+        "message": "Leave Manager MCP Server",
+        "status": "running",
+        "version": "1.16.1"
+    })
+
 # -------------------------------
-# Run MCP server (transport chosen via env)
+# Run MCP server
 # -------------------------------
 if __name__ == "__main__":
     # Optional: warn if Levenshtein missing
     if Levenshtein is None:
-        print("Warning: python-levenshtein not installed. Fuzzy quality will be slightly lower. Install with: pip install python-levenshtein")
+        print("Warning: python-levenshtein not installed. Fuzzy quality will be slightly lower. Install with: pip install python-Levenshtein")
 
-    transport = os.environ.get("MCP_TRANSPORT", "streamable-http")  # "stdio" for desktop, "streamable-http" for cloud
+    transport = os.environ.get("MCP_TRANSPORT", "streamable-http")
     host = os.environ.get("MCP_HOST", "0.0.0.0")
     port = int(os.environ.get("PORT", "8080"))
 
-    # Run: streamable-http (http) for cloud; stdio for local/desktop
+    print(f"Starting Leave Manager MCP Server on {host}:{port} with {transport} transport")
     mcp.run(transport=transport, host=host, port=port)
